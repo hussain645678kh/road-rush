@@ -1,24 +1,23 @@
-# Road Rush — Mobile Web Game
+ROAD RUSH — NEON DRIVE (GitHub Pages replacement files)
 
-## Files
-- `index.html`: the game.
-- `manifest.webmanifest`: mobile install metadata.
-- `sw.js`: basic offline cache for HTTPS hosting.
-- `icon.svg`: app icon.
+Replace these files in the ROOT of your existing road-rush GitHub repository:
+- index.html
+- manifest.webmanifest
+- sw.js
+- icon.svg
 
-## Publish for free with GitHub Pages
-1. Sign in or create an account at https://github.com/
-2. Create a new **public** repository named `road-rush`.
-3. Upload all four files from this folder to the repository root.
-4. Open the repository **Settings → Pages**.
-5. Under **Build and deployment**, choose **Deploy from a branch**.
-6. Choose branch **main** and folder **/(root)**, then click **Save**.
-7. Wait a minute or two. GitHub will show your public URL, usually:
-   `https://YOUR-USERNAME.github.io/road-rush/`
-8. Open that URL on your phone.
+Keep the repository name and account unchanged. Your public GitHub Pages URL should stay the same.
 
-## Add to home screen
-- iPhone: open the published URL in Safari → Share → Add to Home Screen.
-- Android: open the URL in Chrome → menu (⋮) → Add to Home screen / Install app.
+Steps:
+1. Download and unzip road_rush_neon_mobile.zip.
+2. Open your existing GitHub repository.
+3. Choose Add file > Upload files.
+4. Upload these four files, allowing overwrite/replace of the existing files.
+5. Commit changes to the main branch.
+6. Wait 1–3 minutes and reload your existing game URL.
 
-Note: A live public link only exists after you publish these files. The service worker/offline cache requires HTTPS hosting.
+If your phone shows the old design:
+- iPhone Safari: open the page and reload; if installed to Home Screen, close it and reopen. If still old, remove the Home Screen shortcut and add it again after the page updates.
+- You can also wait a little for the service worker cache to update.
+
+The game uses a neon night-city theme and left/right buttons. It works as a browser game; publishing a native app to app stores is a separate process.

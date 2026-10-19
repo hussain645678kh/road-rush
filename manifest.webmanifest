@@ -1,13 +1,13 @@
 {
-  "name": "Road Rush",
+  "name": "Road Rush \u2014 Neon Drive",
   "short_name": "Road Rush",
-  "description": "Dodge traffic and beat your high score.",
+  "description": "Dodge traffic in a neon city highway.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#101820",
-  "theme_color": "#101820",
+  "background_color": "#070b1b",
+  "theme_color": "#070b1b",
   "icons": [
     {
       "src": "./icon.svg",

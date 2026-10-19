@@ -3,159 +3,240 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>Road Rush</title>
-<meta name="theme-color" content="#101820">
-<meta name="description" content="Road Rush - dodge traffic and beat your high score.">
+<meta name="theme-color" content="#070b1b">
+<meta name="description" content="Road Rush — dodge traffic in a neon city highway.">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="./icon.svg">
+<title>ROAD RUSH — Neon Drive</title>
 <style>
-  * { box-sizing: border-box; }
-  body { margin: 0; background: #101820; overscroll-behavior: none; color: #fff; font-family: system-ui, Arial, sans-serif; display: flex; min-height: 100vh; align-items: center; justify-content: center; padding: 12px; }
-  .wrap { width: min(100%, 420px); text-align: center; padding-bottom: env(safe-area-inset-bottom); }
-  @media (max-height: 740px) { body { align-items: flex-start; } .wrap { max-width: 360px; } h1 { font-size: 22px; } }
-  @media (display-mode: standalone) { body { padding-top: env(safe-area-inset-top); } }
-  h1 { margin: 4px 0 8px; font-size: 25px; }
-  .hud { display: flex; justify-content: space-between; margin: 8px 4px; font-weight: 700; }
-  canvas { width: 100%; aspect-ratio: 3 / 5; display: block; background: #252b31; border: 3px solid #f5f5f5; border-radius: 14px; touch-action: none; }
-  .controls { display: flex; gap: 12px; margin-top: 12px; }
-  button { flex: 1; padding: 14px 10px; border: 0; border-radius: 12px; color: white; background: #2878ff; font-size: 18px; font-weight: 800; touch-action: manipulation; }
-  button:active { transform: scale(.98); background: #155bd0; }
-  #restart { background: #e65b35; }
-  .help { color: #c8d2dc; font-size: 13px; margin: 10px 0 0; line-height: 1.5; }
+:root{color-scheme:dark;--cyan:#49f6ff;--pink:#ff3e9d;--panel:rgba(9,15,38,.82)}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:#070b1b;color:#f5f7ff;font-family:Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif}
+body{min-height:100dvh;display:flex;justify-content:center;align-items:center;padding:clamp(8px,2.5vw,18px);overscroll-behavior:none}
+.app{width:min(100%,440px);margin:auto;padding-bottom:env(safe-area-inset-bottom)}
+.topline{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:2px 4px 12px}
+.brand{display:flex;align-items:center;gap:10px}
+.logo{width:43px;height:43px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(145deg,#102e54,#251044);border:1px solid #49f6ff88;box-shadow:0 0 22px #18d9ff25;font-size:25px}
+.brand h1{font-size:clamp(19px,5vw,25px);letter-spacing:2px;margin:0;font-weight:950;line-height:1.05}
+.brand small{display:block;color:#8ba4ca;font-size:10px;letter-spacing:3px;margin-top:4px}
+.pill{border:1px solid #25395c;border-radius:999px;background:#0d1530;padding:7px 10px;font-size:11px;color:#a8bad9;white-space:nowrap}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:0 0 10px}
+.stat{background:linear-gradient(145deg,#111a37d9,#0b1025e8);border:1px solid #24365a;border-radius:13px;padding:9px 12px;min-width:0}
+.stat span{display:block;color:#8397bb;font-size:10px;letter-spacing:1.4px;text-transform:uppercase}
+.stat strong{display:block;font-size:21px;line-height:1.3;font-variant-numeric:tabular-nums}
+.stat:nth-child(1) strong{color:var(--cyan)}.stat:nth-child(2) strong{color:#fff}.stat:nth-child(3) strong{color:#ffca65}
+.game-shell{position:relative;overflow:hidden;border-radius:22px;border:1px solid #48edff80;background:#080d20;box-shadow:0 0 0 3px #111b35,0 0 32px #00d9ff1c}
+canvas{display:block;width:100%;height:auto;aspect-ratio:360/600;touch-action:pan-y}
+.overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:22px;background:linear-gradient(180deg,#060a18a8,#080b20d9);backdrop-filter:blur(3px);text-align:center}
+.overlay.hidden{display:none}
+.dialog{width:min(100%,300px);padding:24px 18px;border:1px solid #4df5ff70;border-radius:22px;background:linear-gradient(155deg,#101b3af2,#100d2af2);box-shadow:0 0 35px #10d9ff20}
+.eyebrow{color:var(--cyan);font-size:10px;letter-spacing:4px;font-weight:800}
+.dialog h2{font-size:31px;line-height:1.05;margin:10px 0 9px;letter-spacing:1px}
+.dialog p{font-size:13px;color:#a9bad9;line-height:1.5;margin:0 0 18px}
+.primary{width:100%;border:0;border-radius:13px;padding:14px 12px;background:linear-gradient(100deg,#27d9f2,#5875ff);color:#071023;font-size:15px;font-weight:950;letter-spacing:1px;box-shadow:0 5px 22px #28d9f44a;touch-action:manipulation}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.move{height:62px;border-radius:16px;border:1px solid #3e5d88;background:linear-gradient(145deg,#111e3c,#0b1128);color:#f4f7ff;font-weight:900;font-size:15px;letter-spacing:1px;touch-action:manipulation;user-select:none;-webkit-user-select:none;box-shadow:inset 0 1px #ffffff0c,0 6px 15px #0003}
+.move span{font-size:22px;vertical-align:-2px;margin-right:7px;color:var(--cyan)}
+.move:active{transform:scale(.98);border-color:var(--cyan);box-shadow:0 0 20px #49f6ff25}
+.hint{text-align:center;color:#788bad;font-size:11px;line-height:1.5;margin:11px 10px 0}
+.hint b{color:#b7c7e5}
+@media(max-height:760px){body{align-items:flex-start}.app{max-width:390px}.topline{margin-bottom:8px}.stats{margin-bottom:8px}.stat{padding:6px 10px}.stat strong{font-size:18px}.controls{margin-top:8px}.move{height:52px}.hint{margin-top:7px}}
+@media(display-mode:standalone){body{padding-top:env(safe-area-inset-top)}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>🚗 ROAD RUSH</h1>
-  <div class="hud"><span>Score: <span id="score">0</span></span><span>Best: <span id="best">0</span></span></div>
-  <canvas id="game" width="360" height="600" aria-label="Car dodging game"></canvas>
-  <div class="controls">
-    <button id="left" aria-label="Move left">⬅️ LEFT</button>
-    <button id="right" aria-label="Move right">RIGHT ➡️</button>
-  </div>
-  <div class="controls"><button id="restart">▶ Start / Restart</button></div>
-  <p class="help">On mobile: use the buttons or tap the left/right side of the road.<br>On computer: use ← → arrow keys.</p>
-</div>
+<main class="app">
+  <header class="topline">
+    <div class="brand"><div class="logo">🏎️</div><div><h1>ROAD RUSH</h1><small>NEON DRIVE</small></div></div>
+    <div class="pill">● LIVE CITY</div>
+  </header>
+  <section class="stats" aria-label="Game statistics">
+    <div class="stat"><span>Score</span><strong id="score">0000</strong></div>
+    <div class="stat"><span>Best</span><strong id="best">0000</strong></div>
+    <div class="stat"><span>Speed</span><strong><span id="speed">1</span><small style="display:inline;font-size:11px;color:#ffca65">x</small></strong></div>
+  </section>
+  <section class="game-shell">
+    <canvas id="game" width="360" height="600" aria-label="Road Rush neon traffic game"></canvas>
+    <div class="overlay" id="overlay">
+      <div class="dialog">
+        <div class="eyebrow">NIGHT CITY • ARCADE</div>
+        <h2 id="overlayTitle">READY TO<br>RACE?</h2>
+        <p id="overlayText">Dodge traffic, chase your high score, and own the neon highway.</p>
+        <button class="primary" id="start">START ENGINE&nbsp; ▶</button>
+      </div>
+    </div>
+  </section>
+  <section class="controls" aria-label="Driving controls">
+    <button class="move" id="left" aria-label="Move left"><span>◀</span> LEFT</button>
+    <button class="move" id="right" aria-label="Move right">RIGHT <span style="margin:0 0 0 7px">▶</span></button>
+  </section>
+  <p class="hint">USE <b>LEFT / RIGHT</b> TO DODGE TRAFFIC<br>Every second counts. Don't crash.</p>
+</main>
 <script>
 (() => {
   const canvas = document.getElementById('game');
   const ctx = canvas.getContext('2d');
-  const scoreEl = document.getElementById('score');
-  const bestEl = document.getElementById('best');
-  const W = canvas.width, H = canvas.height;
-  const lanes = [90, 180, 270];
-  let player, obstacles, score, best = 0, speed, spawnTimer, running, gameOver, lastTime, stripeOffset;
+  const $ = id => document.getElementById(id);
+  const W=360,H=600, roadL=42,roadR=318, laneX=[88,180,272];
+  let player, traffic, particles, score, best=0, speed, spawn, roadOffset, cityOffset, running=false, ended=false, last=0, animation=0;
   try { best = Number(localStorage.getItem('roadRushBest') || 0); } catch(e) {}
-  bestEl.textContent = best;
+  $('best').textContent=String(best).padStart(4,'0');
 
-  function reset() {
-    player = { lane: 1, x: lanes[1], y: 490, w: 42, h: 70 };
-    obstacles = [];
-    score = 0;
-    speed = 210;
-    spawnTimer = 0;
-    stripeOffset = 0;
-    running = true;
-    gameOver = false;
-    lastTime = performance.now();
-    scoreEl.textContent = '0';
-    requestAnimationFrame(loop);
+  const neon=['#ff4c9a','#45dcff','#ffc857','#b58aff','#f4f7ff'];
+  const buildings=[];
+  for(let side=0;side<2;side++){
+    let y=-10;
+    while(y<H+80){const h=35+Math.random()*55;buildings.push({side,y,h,w:17+Math.random()*15,seed:Math.random(),tone:side? '#172044':'#151b3a'});y+=h+8;}
   }
-  function move(dir) {
-    if (!running) { if (gameOver) reset(); return; }
-    player.lane = Math.max(0, Math.min(2, player.lane + dir));
-    player.x = lanes[player.lane];
+  function rounded(x,y,w,h,r,fill,stroke=null,lw=1){
+    ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fillStyle=fill;ctx.fill();
+    if(stroke){ctx.lineWidth=lw;ctx.strokeStyle=stroke;ctx.stroke();}
   }
-  document.getElementById('left').addEventListener('click', () => move(-1));
-  document.getElementById('right').addEventListener('click', () => move(1));
-  document.getElementById('restart').addEventListener('click', reset);
-  window.addEventListener('keydown', e => {
-    if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') { e.preventDefault(); move(-1); }
-    if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') { e.preventDefault(); move(1); }
-    if ((e.key === ' ' || e.key === 'Enter') && !running) reset();
-  });
-  canvas.addEventListener('pointerdown', e => {
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    if (!running && gameOver) { reset(); return; }
-    move(x < rect.width / 2 ? -1 : 1);
-  });
-
-  function roundedRect(x,y,w,h,r,color) {
-    ctx.fillStyle = color; ctx.beginPath();
-    ctx.roundRect(x,y,w,h,r); ctx.fill();
+  function glowLine(x1,y1,x2,y2,color,width=2,blur=10){
+    ctx.save();ctx.shadowColor=color;ctx.shadowBlur=blur;ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.restore();
   }
-  function drawCar(x,y,w,h,color,playerCar=false) {
-    roundedRect(x-w/2, y-h/2, w, h, 9, color);
-    roundedRect(x-w/2+6, y-h/2+12, w-12, 18, 5, playerCar ? '#bcecff' : '#d7f3ff');
-    roundedRect(x-w/2+7, y+h/2-19, w-14, 10, 3, playerCar ? '#123f63' : '#333b44');
-    ctx.fillStyle = '#ffe9a8';
-    ctx.fillRect(x-w/2+4, y-h/2+3, 8, 4);
-    ctx.fillRect(x+w/2-12, y-h/2+3, 8, 4);
-    ctx.fillStyle = '#15191d';
-    ctx.fillRect(x-w/2-3, y-h/2+12, 4, 15);
-    ctx.fillRect(x+w/2-1, y-h/2+12, 4, 15);
-    ctx.fillRect(x-w/2-3, y+h/2-25, 4, 15);
-    ctx.fillRect(x+w/2-1, y+h/2-25, 4, 15);
-  }
-  function draw() {
-    ctx.clearRect(0,0,W,H);
-    ctx.fillStyle = '#237447'; ctx.fillRect(0,0,W,H);
-    ctx.fillStyle = '#30363d'; ctx.fillRect(35,0,290,H);
-    ctx.fillStyle = '#f3f3f3'; ctx.fillRect(39,0,4,H); ctx.fillRect(317,0,4,H);
-    ctx.strokeStyle = '#d5d9dc'; ctx.lineWidth = 4; ctx.setLineDash([30,24]);
-    ctx.lineDashOffset = -stripeOffset;
-    ctx.beginPath(); ctx.moveTo(136,0); ctx.lineTo(136,H); ctx.moveTo(224,0); ctx.lineTo(224,H); ctx.stroke(); ctx.setLineDash([]);
-    for (const o of obstacles) drawCar(o.x,o.y,42,70,o.color,false);
-    if (player) drawCar(player.x,player.y,player.w,player.h,'#ff4545',true);
-    if (!running) {
-      ctx.fillStyle = 'rgba(0,0,0,.68)'; ctx.fillRect(35,0,290,H);
-      ctx.textAlign = 'center';
-      ctx.fillStyle = '#fff'; ctx.font = 'bold 30px system-ui';
-      ctx.fillText(gameOver ? 'GAME OVER' : 'ROAD RUSH', W/2, H/2-25);
-      ctx.font = '18px system-ui';
-      ctx.fillText(gameOver ? 'Score: ' + score : 'Press Start to play', W/2, H/2+12);
-      ctx.font = '15px system-ui'; ctx.fillText('Tap Start / Restart', W/2, H/2+45);
-    }
-  }
-  function loop(now) {
-    if (!running) { draw(); return; }
-    const dt = Math.min((now-lastTime)/1000, .035);
-    lastTime = now;
-    speed += dt * 3;
-    stripeOffset = (stripeOffset + speed*dt) % 54;
-    spawnTimer -= dt;
-    if (spawnTimer <= 0) {
-      const lane = Math.floor(Math.random()*3);
-      obstacles.push({ lane, x: lanes[lane], y: -55, color: ['#ffb02e','#4aa3ff','#c77dff','#f5f5f5'][Math.floor(Math.random()*4)] });
-      spawnTimer = Math.max(.48, 1.05 - score/180);
-    }
-    for (const o of obstacles) o.y += speed*dt;
-    obstacles = obstacles.filter(o => o.y < H+60);
-    for (const o of obstacles) {
-      if (o.lane === player.lane && Math.abs(o.y-player.y) < 58) {
-        running = false; gameOver = true;
-        if (score > best) {
-          best = score; bestEl.textContent = best;
-          try { localStorage.setItem('roadRushBest', String(best)); } catch(e) {}
-        }
-        draw(); return;
+  function drawCity(){
+    const grad=ctx.createLinearGradient(0,0,0,H);grad.addColorStop(0,'#090e28');grad.addColorStop(.55,'#111632');grad.addColorStop(1,'#080d20');
+    ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
+    // distant skyline
+    for(let i=0;i<19;i++){
+      const x=i*20-4, h=45+((i*37)%83);
+      ctx.fillStyle=i%3===0?'#111b3b':'#0d1530';ctx.fillRect(x,120-h,17,h+H);
+      for(let yy=140-h;yy<H;yy+=13) for(let xx=x+4;xx<x+15;xx+=7){
+        if(((xx+yy+i*3)%4)!==0){ctx.fillStyle=(i+Math.floor(yy/13))%4===0?'#1f6b83':'#26345b';ctx.fillRect(xx,yy,3,5);}
       }
     }
-    score += Math.floor(dt*10);
-    scoreEl.textContent = score;
-    draw();
-    requestAnimationFrame(loop);
+    // neon signs
+    glowLine(8,140,8,208,'#ff3e9d',2,9);glowLine(351,86,351,160,'#49f6ff',2,9);
+    rounded(5,230,28,55,4,'#101b3b','#8e4eff',1);ctx.fillStyle='#cb9aff';ctx.font='bold 8px system-ui';ctx.fillText('NITE',9,248);ctx.fillText('CITY',9,260);
+    rounded(326,330,29,47,4,'#101b3b','#ff3e9d',1);ctx.fillStyle='#ff8dc5';ctx.fillText('RUSH',329,350);
   }
-  player = { lane: 1, x: lanes[1], y: 490, w: 42, h: 70 };
-  obstacles = []; score = 0; running = false; gameOver = false;
-  draw();
+  function drawRoad(){
+    // shoulders
+    ctx.fillStyle='#10142a';ctx.fillRect(roadL-9,0,roadR-roadL+18,H);
+    ctx.fillStyle='#171b31';ctx.fillRect(roadL,0,roadR-roadL,H);
+    // road perspective-like central sheen
+    const rg=ctx.createLinearGradient(roadL,0,roadR,0);rg.addColorStop(0,'#171b31');rg.addColorStop(.5,'#24283e');rg.addColorStop(1,'#171b31');
+    ctx.fillStyle=rg;ctx.fillRect(roadL,0,roadR-roadL,H);
+    // road edges neon rails
+    glowLine(roadL,0,roadL,H,'#ff3e9d',2,10);glowLine(roadR,0,roadR,H,'#49f6ff',2,10);
+    // dashed lane lines
+    ctx.save();ctx.setLineDash([26,24]);ctx.lineDashOffset=-roadOffset;ctx.lineWidth=2;
+    ctx.strokeStyle='#8b92b7';ctx.globalAlpha=.7;ctx.beginPath();ctx.moveTo(134,0);ctx.lineTo(134,H);ctx.moveTo(226,0);ctx.lineTo(226,H);ctx.stroke();ctx.restore();
+    // glowing road markers
+    for(let y=(roadOffset%80)-80;y<H;y+=80){
+      rounded(47,y,4,22,2,'#ff4b9a');rounded(309,y+32,4,22,2,'#48eaff');
+    }
+    // subtle road reflections
+    for(let i=0;i<7;i++){
+      const y=(i*107+roadOffset*1.4)%H;
+      ctx.fillStyle='#7e8bb4';ctx.globalAlpha=.08;ctx.fillRect(150,y,60,2);ctx.globalAlpha=1;
+    }
+  }
+  function drawCar(x,y,color,isPlayer=false){
+    ctx.save();ctx.translate(x,y);
+    // shadow / neon underglow
+    ctx.save();ctx.shadowColor=color;ctx.shadowBlur=isPlayer?24:12;ctx.fillStyle=color;ctx.globalAlpha=.28;ctx.beginPath();ctx.ellipse(0,2,22,34,0,0,Math.PI*2);ctx.fill();ctx.restore();
+    // wheels
+    rounded(-22,-23,7,18,2,'#050711');rounded(15,-23,7,18,2,'#050711');rounded(-22,12,7,18,2,'#050711');rounded(15,12,7,18,2,'#050711');
+    // body
+    const body=ctx.createLinearGradient(-19,0,19,0);body.addColorStop(0,'#202747');body.addColorStop(.25,color);body.addColorStop(.7,color);body.addColorStop(1,'#15182d');
+    rounded(-18,-33,36,66,10,body,color,1);
+    // hood detail
+    rounded(-12,-27,24,16,5,isPlayer?'#ffb2d5':'#a8efff');
+    rounded(-11,-7,22,21,5,isPlayer?'#18203e':'#10172e','#ffffff38',1);
+    // roof highlight
+    rounded(-12,-4,24,14,4,'#273451');
+    // windshield gleam
+    ctx.strokeStyle='#ffffffa0';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(-8,-20);ctx.lineTo(7,-20);ctx.stroke();
+    // rear lights
+    rounded(-13,25,8,4,2,'#ff315c');rounded(5,25,8,4,2,'#ff315c');
+    if(isPlayer){
+      // front headlights
+      ctx.save();ctx.shadowColor='#49f6ff';ctx.shadowBlur=15;rounded(-13,-32,8,4,2,'#cfffff');rounded(5,-32,8,4,2,'#cfffff');ctx.restore();
+      glowLine(-14,-15,-14,10,'#fff1f8',1,3);
+    }else{
+      rounded(-13,-32,8,4,2,'#ffedaa');rounded(5,-32,8,4,2,'#ffedaa');
+    }
+    ctx.restore();
+  }
+  function burst(x,y){
+    for(let i=0;i<22;i++){const a=Math.random()*Math.PI*2,v=35+Math.random()*180;particles.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:.45+Math.random()*.5,color:neon[i%neon.length],r:2+Math.random()*3});}
+  }
+  function drawParticles(dt){
+    particles=particles.filter(p=>p.life>0);
+    for(const p of particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=100*dt;p.life-=dt;ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle=p.color;ctx.shadowColor=p.color;ctx.shadowBlur=8;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();}
+    ctx.globalAlpha=1;ctx.shadowBlur=0;
+  }
+  function render(dt=0){
+    ctx.clearRect(0,0,W,H);drawCity();drawRoad();
+    for(const o of traffic)drawCar(o.x,o.y,o.color,false);
+    if(player)drawCar(player.x,player.y,'#ff3e9d',true);
+    drawParticles(dt);
+    // subtle vignette
+    const v=ctx.createRadialGradient(W/2,H/2,130,W/2,H/2,370);v.addColorStop(0,'#00000000');v.addColorStop(1,'#02040b75');ctx.fillStyle=v;ctx.fillRect(0,0,W,H);
+  }
+  function updateHud(){
+    $('score').textContent=String(Math.floor(score)).padStart(4,'0');
+    $('best').textContent=String(best).padStart(4,'0');
+    $('speed').textContent=(speed/210).toFixed(1);
+  }
+  function reset(){
+    if(animation)cancelAnimationFrame(animation);
+    player={lane:1,x:laneX[1],y:500};traffic=[];particles=[];score=0;speed=210;spawn=.45;roadOffset=0;cityOffset=0;running=true;ended=false;last=performance.now();
+    $('overlay').classList.add('hidden');updateHud();animation=requestAnimationFrame(loop);
+  }
+  function move(dir){
+    if(!running){if(ended)reset();return;}
+    player.lane=Math.max(0,Math.min(2,player.lane+dir));player.x=laneX[player.lane];
+  }
+  function finish(){
+    running=false;ended=true;burst(player.x,player.y);
+    if(score>best){best=Math.floor(score);try{localStorage.setItem('roadRushBest',String(best));}catch(e){}}
+    updateHud();render(.016);
+    $('overlayTitle').innerHTML='CRASHED!<br>TRY AGAIN';
+    $('overlayText').textContent='Score: '+Math.floor(score)+' — Best: '+best+'. One more run?';
+    $('start').textContent='RACE AGAIN  ↻';$('overlay').classList.remove('hidden');
+  }
+  function loop(now){
+    if(!running)return;
+    const dt=Math.min((now-last)/1000,.035);last=now;
+    speed=Math.min(360,speed+dt*2.7);roadOffset=(roadOffset+speed*dt)%50;cityOffset+=speed*dt*.18;
+    // move background building windows subtly by shifting the entire skyline texture illusion
+    spawn-=dt;
+    if(spawn<=0){
+      const lane=Math.floor(Math.random()*3);
+      // avoid instant impossible rows: no more than two cars on a single spawn
+      traffic.push({lane,x:laneX[lane],y:-48,color:neon[Math.floor(Math.random()*neon.length)]});
+      spawn=Math.max(.53,1.02-score/550);
+    }
+    for(const o of traffic)o.y+=speed*dt;
+    traffic=traffic.filter(o=>o.y<H+70);
+    score+=dt*10;
+    for(const o of traffic){
+      if(o.lane===player.lane && Math.abs(o.y-player.y)<54){finish();return;}
+    }
+    updateHud();render(dt);animation=requestAnimationFrame(loop);
+  }
+  $('left').addEventListener('click',()=>move(-1));
+  $('right').addEventListener('click',()=>move(1));
+  $('start').addEventListener('click',reset);
+  window.addEventListener('keydown',e=>{
+    if(['ArrowLeft','ArrowRight',' ','Enter'].includes(e.key))e.preventDefault();
+    if(e.key==='ArrowLeft'||e.key.toLowerCase()==='a')move(-1);
+    if(e.key==='ArrowRight'||e.key.toLowerCase()==='d')move(1);
+    if((e.key===' '||e.key==='Enter')&&!running)reset();
+  });
+  // Keep buttons responsive to short taps on touch devices.
+  for(const id of ['left','right']){
+    $(id).addEventListener('contextmenu',e=>e.preventDefault());
+  }
+  player={lane:1,x:laneX[1],y:500};traffic=[];particles=[];score=0;speed=210;roadOffset=0;render();
+  if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost')){
+    window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+  }
 })();
-  // Cache the game files when served over HTTPS (e.g. GitHub Pages).
-  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
-    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
-  }
 </script>
 </body>
 </html>
