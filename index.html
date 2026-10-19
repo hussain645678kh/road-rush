@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Road Rush</title>
+<meta name="theme-color" content="#101820">
+<meta name="description" content="Road Rush - dodge traffic and beat your high score.">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./icon.svg">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #101820; overscroll-behavior: none; color: #fff; font-family: system-ui, Arial, sans-serif; display: flex; min-height: 100vh; align-items: center; justify-content: center; padding: 12px; }
+  .wrap { width: min(100%, 420px); text-align: center; padding-bottom: env(safe-area-inset-bottom); }
+  @media (max-height: 740px) { body { align-items: flex-start; } .wrap { max-width: 360px; } h1 { font-size: 22px; } }
+  @media (display-mode: standalone) { body { padding-top: env(safe-area-inset-top); } }
+  h1 { margin: 4px 0 8px; font-size: 25px; }
+  .hud { display: flex; justify-content: space-between; margin: 8px 4px; font-weight: 700; }
+  canvas { width: 100%; aspect-ratio: 3 / 5; display: block; background: #252b31; border: 3px solid #f5f5f5; border-radius: 14px; touch-action: none; }
+  .controls { display: flex; gap: 12px; margin-top: 12px; }
+  button { flex: 1; padding: 14px 10px; border: 0; border-radius: 12px; color: white; background: #2878ff; font-size: 18px; font-weight: 800; touch-action: manipulation; }
+  button:active { transform: scale(.98); background: #155bd0; }
+  #restart { background: #e65b35; }
+  .help { color: #c8d2dc; font-size: 13px; margin: 10px 0 0; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🚗 ROAD RUSH</h1>
+  <div class="hud"><span>Score: <span id="score">0</span></span><span>Best: <span id="best">0</span></span></div>
+  <canvas id="game" width="360" height="600" aria-label="Car dodging game"></canvas>
+  <div class="controls">
+    <button id="left" aria-label="Move left">⬅️ LEFT</button>
+    <button id="right" aria-label="Move right">RIGHT ➡️</button>
+  </div>
+  <div class="controls"><button id="restart">▶ Start / Restart</button></div>
+  <p class="help">On mobile: use the buttons or tap the left/right side of the road.<br>On computer: use ← → arrow keys.</p>
+</div>
+<script>
+(() => {
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const scoreEl = document.getElementById('score');
+  const bestEl = document.getElementById('best');
+  const W = canvas.width, H = canvas.height;
+  const lanes = [90, 180, 270];
+  let player, obstacles, score, best = 0, speed, spawnTimer, running, gameOver, lastTime, stripeOffset;
+  try { best = Number(localStorage.getItem('roadRushBest') || 0); } catch(e) {}
+  bestEl.textContent = best;
+
+  function reset() {
+    player = { lane: 1, x: lanes[1], y: 490, w: 42, h: 70 };
+    obstacles = [];
+    score = 0;
+    speed = 210;
+    spawnTimer = 0;
+    stripeOffset = 0;
+    running = true;
+    gameOver = false;
+    lastTime = performance.now();
+    scoreEl.textContent = '0';
+    requestAnimationFrame(loop);
+  }
+  function move(dir) {
+    if (!running) { if (gameOver) reset(); return; }
+    player.lane = Math.max(0, Math.min(2, player.lane + dir));
+    player.x = lanes[player.lane];
+  }
+  document.getElementById('left').addEventListener('click', () => move(-1));
+  document.getElementById('right').addEventListener('click', () => move(1));
+  document.getElementById('restart').addEventListener('click', reset);
+  window.addEventListener('keydown', e => {
+    if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') { e.preventDefault(); move(-1); }
+    if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') { e.preventDefault(); move(1); }
+    if ((e.key === ' ' || e.key === 'Enter') && !running) reset();
+  });
+  canvas.addEventListener('pointerdown', e => {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    if (!running && gameOver) { reset(); return; }
+    move(x < rect.width / 2 ? -1 : 1);
+  });
+
+  function roundedRect(x,y,w,h,r,color) {
+    ctx.fillStyle = color; ctx.beginPath();
+    ctx.roundRect(x,y,w,h,r); ctx.fill();
+  }
+  function drawCar(x,y,w,h,color,playerCar=false) {
+    roundedRect(x-w/2, y-h/2, w, h, 9, color);
+    roundedRect(x-w/2+6, y-h/2+12, w-12, 18, 5, playerCar ? '#bcecff' : '#d7f3ff');
+    roundedRect(x-w/2+7, y+h/2-19, w-14, 10, 3, playerCar ? '#123f63' : '#333b44');
+    ctx.fillStyle = '#ffe9a8';
+    ctx.fillRect(x-w/2+4, y-h/2+3, 8, 4);
+    ctx.fillRect(x+w/2-12, y-h/2+3, 8, 4);
+    ctx.fillStyle = '#15191d';
+    ctx.fillRect(x-w/2-3, y-h/2+12, 4, 15);
+    ctx.fillRect(x+w/2-1, y-h/2+12, 4, 15);
+    ctx.fillRect(x-w/2-3, y+h/2-25, 4, 15);
+    ctx.fillRect(x+w/2-1, y+h/2-25, 4, 15);
+  }
+  function draw() {
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle = '#237447'; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle = '#30363d'; ctx.fillRect(35,0,290,H);
+    ctx.fillStyle = '#f3f3f3'; ctx.fillRect(39,0,4,H); ctx.fillRect(317,0,4,H);
+    ctx.strokeStyle = '#d5d9dc'; ctx.lineWidth = 4; ctx.setLineDash([30,24]);
+    ctx.lineDashOffset = -stripeOffset;
+    ctx.beginPath(); ctx.moveTo(136,0); ctx.lineTo(136,H); ctx.moveTo(224,0); ctx.lineTo(224,H); ctx.stroke(); ctx.setLineDash([]);
+    for (const o of obstacles) drawCar(o.x,o.y,42,70,o.color,false);
+    if (player) drawCar(player.x,player.y,player.w,player.h,'#ff4545',true);
+    if (!running) {
+      ctx.fillStyle = 'rgba(0,0,0,.68)'; ctx.fillRect(35,0,290,H);
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#fff'; ctx.font = 'bold 30px system-ui';
+      ctx.fillText(gameOver ? 'GAME OVER' : 'ROAD RUSH', W/2, H/2-25);
+      ctx.font = '18px system-ui';
+      ctx.fillText(gameOver ? 'Score: ' + score : 'Press Start to play', W/2, H/2+12);
+      ctx.font = '15px system-ui'; ctx.fillText('Tap Start / Restart', W/2, H/2+45);
+    }
+  }
+  function loop(now) {
+    if (!running) { draw(); return; }
+    const dt = Math.min((now-lastTime)/1000, .035);
+    lastTime = now;
+    speed += dt * 3;
+    stripeOffset = (stripeOffset + speed*dt) % 54;
+    spawnTimer -= dt;
+    if (spawnTimer <= 0) {
+      const lane = Math.floor(Math.random()*3);
+      obstacles.push({ lane, x: lanes[lane], y: -55, color: ['#ffb02e','#4aa3ff','#c77dff','#f5f5f5'][Math.floor(Math.random()*4)] });
+      spawnTimer = Math.max(.48, 1.05 - score/180);
+    }
+    for (const o of obstacles) o.y += speed*dt;
+    obstacles = obstacles.filter(o => o.y < H+60);
+    for (const o of obstacles) {
+      if (o.lane === player.lane && Math.abs(o.y-player.y) < 58) {
+        running = false; gameOver = true;
+        if (score > best) {
+          best = score; bestEl.textContent = best;
+          try { localStorage.setItem('roadRushBest', String(best)); } catch(e) {}
+        }
+        draw(); return;
+      }
+    }
+    score += Math.floor(dt*10);
+    scoreEl.textContent = score;
+    draw();
+    requestAnimationFrame(loop);
+  }
+  player = { lane: 1, x: lanes[1], y: 490, w: 42, h: 70 };
+  obstacles = []; score = 0; running = false; gameOver = false;
+  draw();
+})();
+  // Cache the game files when served over HTTPS (e.g. GitHub Pages).
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+  }
+</script>
+</body>
+</html>

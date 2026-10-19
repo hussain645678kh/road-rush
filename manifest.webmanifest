@@ -1,0 +1,19 @@
+{
+  "name": "Road Rush",
+  "short_name": "Road Rush",
+  "description": "Dodge traffic and beat your high score.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#101820",
+  "theme_color": "#101820",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
